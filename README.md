@@ -4,26 +4,34 @@ Simple interactive CLI to generate:
 - PEM key pairs (`.private.pem`, `.public.pem`)
 - JWK JSON files (`.private.jwk.json`, `.public.jwk.json`)
 
+## Quick Start (No Install)
+
+Run directly with `npx`:
+
+```bash
+npx jwk-cli-tool
+```
+
+For `npx` mode:
+- CLI asks where to save generated files
+- Default base folder is `./jwk`
+- Files are saved in `<base>/keys` and `<base>/outputs`
+
 ## Requirements
 
 - Node.js 18 or newer
 - npm
 
-## Install
+## Run Locally (Download Version)
+
+If you want to run from cloned source:
 
 ```bash
 npm install
-```
-
-## Run
-
-### Development mode
-
-```bash
 npm run dev
 ```
 
-### Production mode
+Or build + start:
 
 ```bash
 npm run build
