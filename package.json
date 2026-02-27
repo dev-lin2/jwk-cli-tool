@@ -1,6 +1,6 @@
 {
   "name": "jwk-cli-tool",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Interactive CLI for generating PEM and JWK files",
   "main": "dist/index.js",
   "bin": {
