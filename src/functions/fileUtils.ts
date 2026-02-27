@@ -1,9 +1,22 @@
 import { access, mkdir, readFile, readdir, writeFile } from "fs/promises";
 import path from "path";
 
-export const PROJECT_ROOT = process.cwd();
-export const KEYS_DIR = path.join(PROJECT_ROOT, "keys");
-export const OUTPUTS_DIR = path.join(PROJECT_ROOT, "outputs");
+export interface StorageConfig {
+  rootDir: string;
+  keysDir: string;
+  outputsDir: string;
+}
+
+function buildStorageConfig(rootDir: string): StorageConfig {
+  const resolvedRoot = path.resolve(rootDir);
+  return {
+    rootDir: resolvedRoot,
+    keysDir: path.join(resolvedRoot, "keys"),
+    outputsDir: path.join(resolvedRoot, "outputs")
+  };
+}
+
+let storageConfig: StorageConfig = buildStorageConfig(process.cwd());
 
 export interface PemPair {
   name: string;
@@ -22,8 +35,17 @@ export async function ensureDir(dirPath: string): Promise<void> {
   await mkdir(dirPath, { recursive: true });
 }
 
+export function configureStorageRoot(rootDir: string): StorageConfig {
+  storageConfig = buildStorageConfig(rootDir);
+  return storageConfig;
+}
+
+export function getStorageConfig(): StorageConfig {
+  return storageConfig;
+}
+
 export async function ensureProjectDirs(): Promise<void> {
-  await Promise.all([ensureDir(KEYS_DIR), ensureDir(OUTPUTS_DIR)]);
+  await Promise.all([ensureDir(storageConfig.keysDir), ensureDir(storageConfig.outputsDir)]);
 }
 
 export async function fileExists(filePath: string): Promise<boolean> {
@@ -36,8 +58,8 @@ export async function fileExists(filePath: string): Promise<boolean> {
 }
 
 export async function listPemFiles(): Promise<string[]> {
-  await ensureDir(KEYS_DIR);
-  const entries = await readdir(KEYS_DIR, { withFileTypes: true });
+  await ensureDir(storageConfig.keysDir);
+  const entries = await readdir(storageConfig.keysDir, { withFileTypes: true });
 
   return entries
     .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith(".pem"))
@@ -97,11 +119,11 @@ export function groupPemPairs(files: string[]): GroupedPemFiles {
 }
 
 export function keyFilePath(name: string, visibility: "private" | "public"): string {
-  return path.join(KEYS_DIR, `${name}.${visibility}.pem`);
+  return path.join(storageConfig.keysDir, `${name}.${visibility}.pem`);
 }
 
 export function jwkFilePath(name: string, visibility: "private" | "public"): string {
-  return path.join(OUTPUTS_DIR, `${name}.${visibility}.jwk.json`);
+  return path.join(storageConfig.outputsDir, `${name}.${visibility}.jwk.json`);
 }
 
 export async function writeJson(filePath: string, obj: unknown): Promise<void> {
@@ -117,6 +139,9 @@ export async function readTextFile(filePath: string): Promise<string> {
 }
 
 export function relativeToRoot(filePath: string): string {
-  return path.relative(PROJECT_ROOT, filePath);
+  return path.relative(storageConfig.rootDir, filePath);
 }
 
+export function resolveInKeysDir(fileName: string): string {
+  return path.join(storageConfig.keysDir, fileName);
+}

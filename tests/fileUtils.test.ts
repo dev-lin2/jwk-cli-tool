@@ -3,8 +3,10 @@ import os from "os";
 import path from "path";
 import { beforeEach, afterEach, describe, expect, it } from "vitest";
 import {
+  configureStorageRoot,
   ensureDir,
   fileExists,
+  getStorageConfig,
   groupPemPairs,
   jwkFilePath,
   keyFilePath,
@@ -87,5 +89,25 @@ describe("fileUtils", () => {
     const relativeKeyPath = relativeToRoot(privateKeyPath);
     expect(relativeKeyPath).toBe(path.join("keys", "demo.private.pem"));
   });
-});
 
+  it("uses configured storage root for key and output directories", () => {
+    const previous = getStorageConfig();
+    const customRoot = path.join(tempDir, "custom-root");
+
+    try {
+      configureStorageRoot(customRoot);
+      const config = getStorageConfig();
+      const privateKeyPath = keyFilePath("app", "private");
+      const publicJwkPath = jwkFilePath("app", "public");
+
+      expect(config.rootDir).toBe(path.resolve(customRoot));
+      expect(config.keysDir).toBe(path.join(path.resolve(customRoot), "keys"));
+      expect(config.outputsDir).toBe(path.join(path.resolve(customRoot), "outputs"));
+      expect(privateKeyPath).toBe(path.join(config.keysDir, "app.private.pem"));
+      expect(publicJwkPath).toBe(path.join(config.outputsDir, "app.public.jwk.json"));
+      expect(relativeToRoot(privateKeyPath)).toBe(path.join("keys", "app.private.pem"));
+    } finally {
+      configureStorageRoot(previous.rootDir);
+    }
+  });
+});

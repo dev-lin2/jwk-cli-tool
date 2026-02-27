@@ -1,12 +1,11 @@
 import { input, select } from "@inquirer/prompts";
-import path from "path";
 import {
   groupPemPairs,
   jwkFilePath,
-  KEYS_DIR,
   listPemFiles,
   readTextFile,
   relativeToRoot,
+  resolveInKeysDir,
   writeJson
 } from "../functions/fileUtils";
 import { Algorithm, RSA_ALGORITHMS } from "../functions/keyGen";
@@ -59,8 +58,8 @@ async function selectExistingPemFiles(): Promise<ExistingPemSelection | null> {
 
     return {
       name: selectedPair.name,
-      privatePath: path.join(KEYS_DIR, selectedPair.privateFile),
-      publicPath: path.join(KEYS_DIR, selectedPair.publicFile)
+      privatePath: resolveInKeysDir(selectedPair.privateFile),
+      publicPath: resolveInKeysDir(selectedPair.publicFile)
     };
   }
 
@@ -95,8 +94,8 @@ async function selectExistingPemFiles(): Promise<ExistingPemSelection | null> {
 
   return {
     name: nameInput.trim(),
-    privatePath: path.join(KEYS_DIR, privateFile as string),
-    publicPath: path.join(KEYS_DIR, publicFile as string)
+    privatePath: resolveInKeysDir(privateFile as string),
+    publicPath: resolveInKeysDir(publicFile as string)
   };
 }
 
