@@ -1,4 +1,5 @@
 import { select } from "@inquirer/prompts";
+import { ExitPromptError } from "@inquirer/core";
 import { ensureProjectDirs } from "./functions/fileUtils";
 import { runGenerateKeyFlow } from "./prompts/generateKey";
 import { runGenerateJwkFlow } from "./prompts/generateJwk";
@@ -45,6 +46,10 @@ export async function runCliApp(): Promise<void> {
 
       await runGenerateJwkFlow();
     } catch (error) {
+      if (error instanceof ExitPromptError) {
+        console.log("Goodbye.");
+        return;
+      }
       console.error(`\nOperation failed: ${formatErrorMessage(error)}\n`);
     }
   }

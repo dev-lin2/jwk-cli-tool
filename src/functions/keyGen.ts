@@ -1,12 +1,16 @@
 import { generateKeyPairSync } from "crypto";
 
 export type Algorithm = "ES256" | "ES384" | "ES512" | "RS256" | "RS384" | "RS512";
+export type EncAlgorithm = "ECDH-ES" | "ECDH-ES+A128KW" | "ECDH-ES+A192KW" | "ECDH-ES+A256KW" | "RSA-OAEP" | "RSA-OAEP-256";
+export type JwkAlgorithm = Algorithm | EncAlgorithm;
 export type KeyType = "EC" | "RSA";
 
 export const DEFAULT_ALGORITHM: Algorithm = "ES256";
 export const ALL_ALGORITHMS: Algorithm[] = ["ES256", "ES384", "ES512", "RS256", "RS384", "RS512"];
 export const EC_ALGORITHMS: Algorithm[] = ["ES256", "ES384", "ES512"];
 export const RSA_ALGORITHMS: Algorithm[] = ["RS256", "RS384", "RS512"];
+export const EC_ENC_ALGORITHMS: EncAlgorithm[] = ["ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW"];
+export const RSA_ENC_ALGORITHMS: EncAlgorithm[] = ["RSA-OAEP", "RSA-OAEP-256"];
 
 const EC_CURVE_BY_ALGORITHM: Record<"ES256" | "ES384" | "ES512", string> = {
   ES256: "P-256",

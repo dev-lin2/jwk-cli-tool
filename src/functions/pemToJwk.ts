@@ -1,5 +1,5 @@
 import { createPrivateKey, createPublicKey, KeyObject } from "crypto";
-import { Algorithm } from "./keyGen";
+import { Algorithm, JwkAlgorithm } from "./keyGen";
 
 export type KeyUse = "sig" | "enc";
 
@@ -21,7 +21,7 @@ function exportJwk(keyObject: KeyObject): Jwk {
   return keyObject.export({ format: "jwk" }) as unknown as Jwk;
 }
 
-function withMetadata(jwk: Jwk, algorithm: Algorithm, kid: string, use: KeyUse): Jwk {
+function withMetadata(jwk: Jwk, algorithm: JwkAlgorithm, kid: string, use: KeyUse): Jwk {
   return {
     ...jwk,
     use,
@@ -44,7 +44,7 @@ export function detectAlgorithmFromPem(publicPem: string): Algorithm | undefined
 export function convertPemPairToJwks(
   privatePem: string,
   publicPem: string,
-  algorithm: Algorithm,
+  algorithm: JwkAlgorithm,
   kid: string,
   use: KeyUse = "sig"
 ): { privateJwk: Jwk; publicJwk: Jwk } {

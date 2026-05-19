@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Heysara\\\\jwk-cli-tool\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(npm run *)"
+    ]
+  }
+}

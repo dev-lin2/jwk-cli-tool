@@ -20,17 +20,17 @@ describe("pemToJwk", () => {
     const { privateJwk, publicJwk } = convertPemPairToJwks(
       privatePem,
       publicPem,
-      "ES256",
+      "ECDH-ES+A128KW",
       "my-key-id",
       "enc"
     );
 
-    expect(privateJwk.alg).toBe("ES256");
+    expect(privateJwk.alg).toBe("ECDH-ES+A128KW");
     expect(privateJwk.kid).toBe("my-key-id");
     expect(privateJwk.use).toBe("enc");
     expect(typeof privateJwk.d).toBe("string");
 
-    expect(publicJwk.alg).toBe("ES256");
+    expect(publicJwk.alg).toBe("ECDH-ES+A128KW");
     expect(publicJwk.kid).toBe("my-key-id");
     expect(publicJwk.use).toBe("enc");
     expect(publicJwk.d).toBeUndefined();

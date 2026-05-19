@@ -1,5 +1,6 @@
-import { input, select } from "@inquirer/prompts";
+import { confirm, input, select } from "@inquirer/prompts";
 import {
+  fileExists,
   groupPemPairs,
   jwkFilePath,
   listPemFiles,
@@ -8,7 +9,15 @@ import {
   resolveInKeysDir,
   writeJson
 } from "../functions/fileUtils";
-import { Algorithm, RSA_ALGORITHMS } from "../functions/keyGen";
+import {
+  Algorithm,
+  EC_ENC_ALGORITHMS,
+  EncAlgorithm,
+  isEcAlgorithm,
+  JwkAlgorithm,
+  RSA_ALGORITHMS,
+  RSA_ENC_ALGORITHMS
+} from "../functions/keyGen";
 import { convertPemPairToJwks, detectAlgorithmFromPem, KeyUse } from "../functions/pemToJwk";
 import { promptForAlgorithm, runGenerateKeyFlow } from "./generateKey";
 
@@ -161,9 +170,36 @@ export async function runGenerateJwkFlow(): Promise<void> {
   });
   const kid = kidInput.trim() || name;
 
-  const { privateJwk, publicJwk } = convertPemPairToJwks(privatePem, publicPem, algorithm, kid, use);
+  let jwkAlgorithm: JwkAlgorithm = algorithm!;
+  if (use === "enc") {
+    const isEc = isEcAlgorithm(algorithm!);
+    jwkAlgorithm = await select<EncAlgorithm>({
+      message: "Encryption algorithm (alg):",
+      choices: (isEc ? EC_ENC_ALGORITHMS : RSA_ENC_ALGORITHMS).map((alg) => ({ name: alg, value: alg })),
+      default: isEc ? "ECDH-ES+A128KW" : "RSA-OAEP"
+    });
+  }
+
   const privateOutputPath = jwkFilePath(name, "private");
   const publicOutputPath = jwkFilePath(name, "public");
+
+  const [privateExists, publicExists] = await Promise.all([
+    fileExists(privateOutputPath),
+    fileExists(publicOutputPath)
+  ]);
+
+  if (privateExists || publicExists) {
+    const overwrite = await confirm({
+      message: `JWK files for "${name}" already exist. Overwrite them?`,
+      default: false
+    });
+    if (!overwrite) {
+      console.log("Skipped.\n");
+      return;
+    }
+  }
+
+  const { privateJwk, publicJwk } = convertPemPairToJwks(privatePem, publicPem, jwkAlgorithm, kid, use);
 
   await Promise.all([
     writeJson(privateOutputPath, privateJwk),
